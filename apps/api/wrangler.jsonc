@@ -1,0 +1,15 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "hasan-ebook-market-api-dev",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-30",
+  "vars": { "ALLOWED_ORIGINS": "" },
+  "r2_buckets": [{ "binding": "BOOKS_PRIVATE", "bucket_name": "hasan-ebook-market-private-dev" }],
+  "env": {
+    "production": {
+      "name": "hasan-ebook-market-api",
+      "vars": { "ALLOWED_ORIGINS": "" },
+      "r2_buckets": [{ "binding": "BOOKS_PRIVATE", "bucket_name": "hasan-ebook-market-private-prod" }]
+    }
+  }
+}

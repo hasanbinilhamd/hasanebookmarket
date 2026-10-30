@@ -9,3 +9,8 @@ dist/
 .local/
 .npm/
 .sudo_as_admin_successful
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+.wrangler/
+.wrangler-build/

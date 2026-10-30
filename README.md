@@ -1,54 +1,38 @@
-# Hasan Ebook Market — Phase 1
+# Hasan Ebook Market — Phase 2 foundation
 
-A single-scene interactive 3D bookstore prototype using React, Vite, Three.js and React Three Fiber. The six books are sample content, not actual products. Authentication, checkout, payments, APIs and a reader are **not implemented**.
+A single repository with independent React/Vite 3D web and Cloudflare Workers API workspaces. All catalog books remain samples. No functional authentication, checkout, payment, reader or admin exists. Phase 2 has local foundations; it is **not a deployed production system**.
 
-## Run, build and test
+## Prerequisites and commands
 
-Requires Node.js 20+ and npm.
+Node.js **22+** and npm are required (current Wrangler requires Node 22). From repository root:
 
 ```sh
 npm ci
-npm run dev
-npm run build
-npm test
+npm run dev                         # web on 5173, or: npm run dev -- --port 5174 --strictPort
+npm run dev:api                     # separate terminal; Worker on 8787
+npm test                            # API and web unit tests
+npm run build                       # Worker dry-run bundle and web production build
 ```
 
-The dev server normally starts on port 5173; use `npm run dev -- --port 5174 --strictPort` to choose the preview port. The production output is `dist/`. `vercel.json` provides SPA rewrites for deep links on Vercel; other hosts must serve `index.html` for client routes while still serving static files normally. Configure Vercel's build command as `npm run build` and output directory as `dist`.
+Web: `apps/web`, Vite output `apps/web/dist`; API: `apps/api`, Wrangler development uses locally simulated R2. Test `/api/health`; `/api/health/db` is deliberately protected by a server-only health token. A local or remote Neon connection is not configured by default. The web still uses mock catalog data and does not call the API. No secret should be entered into the frontend.
 
-## Current architecture
+An optional browser smoke test requires separately installed Playwright and Chromium; see [deployment and testing](docs/DEPLOYMENT.md). The Phase 1 smoke test expects the web on port 5174 and writes ignored screenshots to `.audit-local/`.
 
-The repository stays a single npm-based monorepo. The existing Vite frontend is still at the root to avoid a risky move. npm workspace patterns for future `apps/*` and `packages/*` are configured, but no empty services or packages are created. The planned independently deployable apps and the future migration are documented in [architecture](docs/ARCHITECTURE.md).
+## Project structure
 
-- `src/components/library/LibraryScene.jsx` — existing WebGL architecture, books, lights, textures and animation.
-- `src/components/storefront/` — existing UI, selection state and details.
-- `src/catalog.js` — editable sample catalog and art direction.
-- `src/services/books.js` — mock-backed catalog model and retrieval interface.
-- `src/routing/` — home route and explicitly nonfunctional placeholders.
-- `src/style.css` — preserved storefront styling.
-- `tests/` — Node tests for catalog and route resolution.
-- `docs/` — audit, architecture, roadmap and change log.
-
-`/` is the 3D bookstore. `/book/:slug`, `/login`, `/checkout`, `/my-library`, `/reader/:bookId` and `/admin` are **placeholder pages only**. They perform no authentication, purchases, reading or administration. Unknown routes display a not-found message. They do not change the in-scene selection flow.
-
-## Editing sample books
-
-Edit `src/catalog.js`. Each sample has a stable `id`, content, cover colors and a `motif`. Array order determines shelf placement; the current composition is tuned for six books. To use a cover, set `coverImage` to a public image URL or `/covers/title.jpg` in Vite's `public` directory. Images should be 2:3 portrait; remote images require CORS. `src/services/books.js` maps existing fields into a consistent model including `slug`, `cover_image`, `preview_images`, `page_count`, `publication_status`, `created_at`, and `updated_at`. Prices, currency, page count and dates unknown for samples are `null`; `price_label` preserves the existing sample display. The service is synchronous and mock-backed, not an API; asynchronous loading and error handling will need explicit design when the backend exists.
-
-Select a book and drag to inspect. Use Reset View, Back or Escape to return. Tab reveals keyboard-accessible book buttons. The original reduced-motion handling, mobile layout, loading state and WebGL fallback remain in place.
-
-## Configuration and security
-
-`.env.example` contains only a public Vite variable placeholder; it is not connected to an API. Never place database URLs, storage secrets, payment server keys, OAuth client secrets or access tokens in Vite variables. Future backend services are planned, not implemented. Supabase is not part of the architecture.
-
-## Optional browser smoke check
-
-The initial Phase 1 browser check used Playwright and headless Chromium with software WebGL; these are optional test tooling and are not project dependencies. With the dev server running on port 5174:
-
-```sh
-npm install --no-save --package-lock=false playwright
-npx playwright install chromium
-# Depending on your OS, Chromium system libraries may also be required.
-node scripts/browser-smoke.cjs
+```
+apps/web/                     existing 3D storefront, routes and mock catalog
+apps/api/                     Worker, health checks, server-only storage/auth interfaces
+infrastructure/database/      versioned SQL migration
+infrastructure/storage/       storage policy notes
+docs/                         audit, roadmap, architecture and Phase 2 setup
+scripts/                      optional browser smoke test
 ```
 
-The script checks route placeholders, six desktop selections, mobile selection, mouse/touch gestures, reset and return; screenshots go to ignored `.audit-local/`. Gesture appearance was also manually compared. Real-device performance, browser compatibility and frame rate remain to be tested separately.
+The npm workspace patterns also reserve `packages/*`, but no shared package is created: no meaningful contract is currently consumed by both applications. The rendering worker is a future independent application. There is one root lockfile. `apps/web/vercel.json` contains the SPA rewrite; set Vercel Root Directory to `apps/web` as described in [deployment](docs/DEPLOYMENT.md).
+
+Read [architecture](docs/ARCHITECTURE.md), [environment setup](docs/ENVIRONMENT_SETUP.md), [database](docs/DATABASE.md), [storage](docs/STORAGE.md), [authentication](docs/AUTHENTICATION.md), [baseline](docs/PHASE_2_BASELINE.md) and [change log](docs/PHASE_2_CHANGELOG.md) before deploying. The migration has been checked on a disposable local PostgreSQL database, not Neon. Actual Neon, private R2 resources, domains and authentication are still pending owner setup and verification.
+
+## Security
+
+Never put database URLs, OAuth secrets, provider credentials or health tokens in `VITE_*`, Git, browser code, issue trackers, logs, screenshots, or chat. `.env.example` is informational only. Keep `apps/api/.dev.vars` and actual environment files uncommitted; configure Cloudflare secrets separately for each environment. Original PDFs must remain private and must never be served to browsers. Supabase is prohibited and is not used.

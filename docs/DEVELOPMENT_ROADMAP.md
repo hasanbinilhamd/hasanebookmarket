@@ -2,8 +2,8 @@
 
 Each phase requires review and approval before the next begins. Status refers to implementation, not a guarantee of future dates.
 
-1. **Foundation & frontend refactoring** — audit and preserve the 3D storefront; modular UI, mock catalog service, route placeholders, workspace direction, documentation and validation. Current phase; awaiting review.
-2. **Backend infrastructure & authentication** — after Phase 1 approval, establish Cloudflare Workers API, Neon and private R2; design schema/migrations and implement Google OAuth + email authentication and authorization. Requires infrastructure accounts and security decisions; do not expose secrets to the browser.
+1. **Foundation & frontend refactoring** — audit and preserve the 3D storefront; modular UI, mock catalog service, route placeholders, workspace direction, documentation and validation. Completed and delivered; baseline for Phase 2.
+2. **Backend infrastructure & authentication** — in progress: local Worker, domain migration and storage binding foundation exist; Neon/R2 provisioning, authentication integration and external verification are pending owner decisions and credentials. Do not expose secrets to the browser.
 3. **Book management** — depends on Phase 2 data, storage and admin authorization. Implement dynamic catalog and authorized book management with private PDF uploads.
 4. **Secure reader** — depends on Phase 2 auth/licenses and Phase 3 books/assets. Dedicated rendering worker, rasterized private pages, server-side personal watermark, license checks and reading interface. A controlled test entitlement may be needed before real payments; do not fake purchases.
 5. **E-commerce & Midtrans** — depends on authenticated users, books, pricing and the licensing model. Backend creates orders, verifies gateway notifications/status, handles idempotency and issues licenses; checkout UI must not pretend to be functional earlier.

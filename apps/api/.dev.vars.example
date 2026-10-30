@@ -1,0 +1,3 @@
+# Worker-local secrets only. Copy to .dev.vars; never commit the real file.
+DATABASE_URL=
+DB_HEALTH_TOKEN=

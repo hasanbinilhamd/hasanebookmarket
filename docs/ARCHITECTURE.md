@@ -1,19 +1,32 @@
-# Architecture
+# Architecture — Phase 2
 
-## Implemented in Phase 1
+```
+Browser -> Vercel: apps/web (React + Vite + Three.js, currently mock catalog)
+                  |
+                  | future API calls (not connected yet)
+                  v
+        Cloudflare Workers: apps/api
+           |                    |
+     Neon over HTTP       R2 Worker binding
+     (DB health only)     (no public object route)
 
-The root React 18/Vite 6 app uses Three.js and React Three Fiber for the single persistent library scene. `LibraryScene` owns the procedural room, book geometry, materials, camera and 3D interaction; `Storefront` owns selection and responsive UI state; `BookDetail` and `StorefrontChrome` own presentational markup. Book content flows from the mock-backed `services/books.js` into the scene and panel. Client routes resolve locally; all non-home routes are visibly nonfunctional placeholders. Vite compiles the frontend; Vercel SPA rewrites support direct links. `.env.example` defines only a public, currently unused placeholder.
+Future: independently deployed PDF rendering worker; Google/email auth;
+Midtrans; license-authorized raster reader with server-side watermark.
+```
 
-The repository is one monorepo. npm `workspaces` recognizes `apps/*` and `packages/*` without creating empty services. The current web app intentionally remains at the root; when separately deployable apps are actually introduced, migrate the web app to `apps/web` only with verified path, lockfile, build, route and Vercel deployment changes. Add `apps/api`, `apps/rendering-worker`, `packages/shared`, and `infrastructure` when needed, not as empty implementations. Each actual app should have its own build/deploy configuration and lifecycle; one repository does not imply one deployment.
+## Implemented locally
 
-## Planned, not implemented
+- npm workspaces: web at `apps/web`, API at `apps/api`; root lockfile and orchestration. Web's original procedural scene, assets, style and interactions were moved intact. Routes except `/` remain honest placeholders.
+- Worker `GET /api/health`; `GET /api/health/db` requires a separate secret operator bearer token, at least 32 characters, before issuing a Neon HTTP `SELECT 1`. Error output is generic; no credentials or SQL are returned. Configure rate limits and network restrictions externally before production. Neither endpoint verifies user sessions.
+- Exact-origin CORS allowlist for browser requests, closed by default; origin check is not authentication. Unknown routes and unsafe methods are denied. There are no object upload/download routes.
+- Neon serverless driver for a single HTTP query, used only by Worker. Direct Postgres connection (`pg`, Node only) runs SQL migrations under a session advisory lock; use a **direct, not pooled** connection for migrations. Initial domain schema is provider-independent, provisional, and not a finished authentication schema.
+- R2 `BOOKS_PRIVATE` binding is configured with development/production names; these names are placeholders until owner creates and verifies buckets. Server helpers are not exposed via HTTP. Local Wrangler uses a simulator; no real R2 bucket has been provisioned or verified.
+- `requireVerifiedSession` deliberately throws: no auth provider, sessions, Google OAuth or email flow are active. Better Auth is recommended subject to owner decisions; an auth migration and identity linkage are not complete.
 
-- React/Vite/Three.js web frontend deployed on Vercel.
-- Cloudflare Workers backend API for authentication, authorization, order management, reader access and webhooks. Google OAuth and email authentication are planned; no authentication exists today.
-- Neon PostgreSQL for users, books, orders, payments, licenses, reading progress and security records.
-- Cloudflare R2 private buckets for original PDFs and rendered pages; public covers may be separately hosted. Originals are never delivered to browsers.
-- Dedicated independently deployed rendering worker/container validates PDFs and converts pages to private raster images. The reader API verifies identity and license and applies personalized watermarking server-side before returning individual pages.
-- Midtrans Snap processes payments; backend verifies notifications/status and issues licenses idempotently, not based on browser redirects.
-- Custom raster reader supports authorized reading; screenshot deterrents are imperfect and cannot prevent recording or photography. Per-page access, rate limiting and monitoring mitigate rather than eliminate copying.
+See [database](DATABASE.md), [storage](STORAGE.md), [authentication](AUTHENTICATION.md), and [deployment](DEPLOYMENT.md). A shared package is intentionally deferred until there is a real contract used by both workspaces; a rendering worker is likewise not yet created.
 
-Only public configuration belongs in frontend `VITE_` variables. Neon credentials, R2 secrets, Midtrans server keys, OAuth client secrets and signing keys belong exclusively in appropriately managed backend secrets. No secrets in frontend bundles or source control. The project does not use Supabase.
+## Planned and not implemented
+
+Cloudflare Workers will eventually provide authenticated catalog/admin/reader APIs. Neon stores structured data; private Cloudflare R2 stores originals and rendered pages. A dedicated, separately deployed worker/container will validate and rasterize PDFs and burn personalized watermarks server-side. A custom reader must check entitlements per page and rate-limit access. Browser-based protections cannot prevent all screenshots or recording. Midtrans payment verification and idempotent license issuance remain later-phase work; frontend callbacks alone never grant access. Original PDFs must never be public or sent to browsers. A non-expiring entitlement is subject to service availability and account policy, not an absolute promise of perpetual operation.
+
+Frontend `VITE_*` values are public. Database URLs, health tokens, OAuth client secrets and email keys belong only in backend secrets. No Supabase integration is permitted.
