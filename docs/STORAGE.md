@@ -1,3 +1,5 @@
+> **V3 update:** private paid PDF downloads through time-limited, authorized links are now the product target. They are not implemented yet; the earlier reader-only statements below are historical. See [v3 status](GUEST_CHECKOUT_V3_AUDIT.md).
+
 # Private Cloudflare R2
 
 ## Actual status

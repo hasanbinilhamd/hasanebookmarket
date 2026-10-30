@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// SQL migrations remain the authoritative schema. These models cover the
+// new guest foundation; legacy tables are preserved, not managed by Prisma.
+model CheckoutDraft {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  capabilityHash  Bytes     @unique @map("capability_hash")
+  customerName    String    @map("customer_name")
+  customerEmail   String    @map("customer_email")
+  customerWhatsapp String   @map("customer_whatsapp")
+  emailVerifiedAt DateTime? @map("email_verified_at") @db.Timestamptz(6)
+  expiresAt       DateTime  @map("expires_at") @db.Timestamptz(6)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
+  @@index([expiresAt], map: "checkout_drafts_expiry_idx")
+  @@map("checkout_drafts")
+}
+model CheckoutEmailOtp {
+  checkoutId String   @id @map("checkout_id") @db.Uuid
+  otpMac     Bytes    @map("otp_mac")
+  attempts   Int      @default(0)
+  expiresAt  DateTime @map("expires_at") @db.Timestamptz(6)
+  lastSentAt DateTime @default(now()) @map("last_sent_at") @db.Timestamptz(6)
+  consumedAt DateTime? @map("consumed_at") @db.Timestamptz(6)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  @@map("checkout_email_otps")
+}
+model PaymentEvent {
+  id                    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orderId               String   @map("order_id") @db.Uuid
+  eventFingerprint      Bytes    @unique @map("event_fingerprint")
+  providerTransactionId String?  @map("provider_transaction_id")
+  providerStatus        String   @map("provider_status")
+  statusCode            String   @map("status_code")
+  amountMinor           BigInt   @map("amount_minor")
+  currency              String
+  receivedAt            DateTime @default(now()) @map("received_at") @db.Timestamptz(6)
+  @@index([orderId, receivedAt(sort: Desc)], map: "payment_events_order_idx")
+  @@map("payment_events")
+}
+model DownloadToken {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orderItemId String    @map("order_item_id") @db.Uuid
+  tokenHash   Bytes     @unique @map("token_hash")
+  expiresAt   DateTime  @map("expires_at") @db.Timestamptz(6)
+  revokedAt   DateTime? @map("revoked_at") @db.Timestamptz(6)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  @@index([orderItemId], map: "download_tokens_item_idx")
+  @@map("download_tokens")
+}
+model DeliveryJob {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orderId        String    @map("order_id") @db.Uuid
+  kind           String
+  status         String    @default("queued")
+  attempts       Int       @default(0)
+  availableAt    DateTime  @default(now()) @map("available_at") @db.Timestamptz(6)
+  leaseExpiresAt DateTime? @map("lease_expires_at") @db.Timestamptz(6)
+  lastErrorCode  String?   @map("last_error_code")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
+  @@index([status, availableAt], map: "delivery_jobs_pending_idx")
+  @@map("delivery_jobs")
+}
+model CheckoutRateLimit {
+  subjectHash    Bytes    @map("subject_hash")
+  action         String
+  windowStartedAt DateTime @map("window_started_at") @db.Timestamptz(6)
+  count          Int
+  @@id([subjectHash,action,windowStartedAt])
+  @@map("checkout_rate_limits")
+}
+model AdminAuditEvent {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  actorId   String   @map("actor_id")
+  action    String
+  orderId   String?  @map("order_id") @db.Uuid
+  bookId    String?  @map("book_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  @@map("admin_audit_events")
+}

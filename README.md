@@ -1,3 +1,5 @@
+> **Product direction v3:** guest checkout with email OTP and time-limited private ebook downloads replaces the previous customer-account reader plan. Work is in progress; see [v3 audit and status](docs/GUEST_CHECKOUT_V3_AUDIT.md).
+
 # Hasan Ebook Market — Phase 2 foundation
 
 A single repository with independent React/Vite 3D web and Cloudflare Workers API workspaces. All catalog books remain samples. No functional authentication, checkout, payment, reader or admin exists. Phase 2 has local foundations; it is **not a deployed production system**.

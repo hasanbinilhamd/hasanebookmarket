@@ -1,3 +1,5 @@
+> **V3 update:** `0002_guest_checkout.sql` adds a guest-checkout foundation without removing old account-linked data. It was tested only against a disposable database. Review, obtain approval and back up before running against an owner database; see [v3 audit](GUEST_CHECKOUT_V3_AUDIT.md).
+
 # Neon / database
 
 ## Implemented vs pending

@@ -1,3 +1,5 @@
+> **Historical Phase 2 document:** the v3 brief changes the target to guest checkout and private ebook downloads. See [current audit/status](GUEST_CHECKOUT_V3_AUDIT.md); the old reader and customer-auth plans below are superseded.
+
 # Architecture — Phase 2
 
 ```

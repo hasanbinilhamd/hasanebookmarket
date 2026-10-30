@@ -12,9 +12,13 @@
     "build": "npm run build --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "dev:api": "npm run dev --workspace @hasan/api --",
-    "db:migrate": "npm run migrate --workspace @hasan/api"
+    "db:migrate": "npm run migrate --workspace @hasan/api",
+    "dev:backend": "npm run dev --workspace @hasan/backend --"
   },
   "engines": {
     "node": "22.x"
+  },
+  "overrides": {
+    "deepmerge-ts": "8.0.1"
   }
 }

@@ -14,3 +14,7 @@ dist/
 !.dev.vars.example
 .wrangler/
 .wrangler-build/
+
+# Next.js build output and local tool configuration/logs
+.next/
+.config/

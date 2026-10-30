@@ -29,3 +29,9 @@ Run web at port 5174 (`npm run dev -- --port 5174 --strictPort`). To install opt
 ## Root-output fix verification
 
 For the reported `STATIC_BUILD_NO_OUT_DIR` error, root `vercel.json` now overrides the build and output paths. Validation used `npm ci`, workspace unit tests, and Vercel CLI 65.4.0 `vercel build --prod` in an isolated local project with simulated Vercel settings and already-installed dependencies. The generated `.vercel/output/static` contained `index.html` and Vite assets, and the generated routing config handled filesystem paths before the SPA fallback. This does not verify the owner's actual Vercel project settings or hosted deployment; check the next deployment log.
+
+## V3 Next.js backend foundation (not deployed)
+
+`apps/backend` is a separate Next.js API workspace; it does not replace the existing Vite Vercel project or the Worker yet. A future deployment needs a separate Vercel project with Root Directory `apps/backend` and permission to use the root npm workspace files. Set the owner-approved API hostname and server-only secrets in that project's environment; see `apps/backend/.env.example`. This setup has not been tested on hosted Vercel. Only `/api/health` exists: no checkout, payment, email, download or admin routes are active. Do not use this as a production checkout.
+
+For local health testing: `npm run dev:backend`, then request `/api/health` on port 3001. The frontend is not connected. Prisma schema is partial and SQL migrations remain authoritative; never run Prisma schema sync on a database with real data.
