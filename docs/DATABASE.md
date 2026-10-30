@@ -2,9 +2,13 @@
 
 ## Implemented vs pending
 
-`apps/api/src/db.js` uses `@neondatabase/serverless` over HTTP for one request-scoped `SELECT 1`. [Neon recommends its serverless driver for Workers; HTTP is suitable for independent queries and WebSockets for interactive transactions](https://neon.com/docs/connect/choose-connection). [Cloudflare also documents the driver and Hyperdrive](https://developers.cloudflare.com/workers/databases/third-party-integrations/neon/); Hyperdrive can be evaluated later, it is not configured here. No database connection is made from React. Neon itself has **not been connected or tested**; no credentials were provided.
+`apps/api/src/db.js` uses `@neondatabase/serverless` over HTTP for one request-scoped `SELECT 1`. [Neon recommends its serverless driver for Workers; HTTP is suitable for independent queries and WebSockets for interactive transactions](https://neon.com/docs/connect/choose-connection). [Cloudflare also documents the driver and Hyperdrive](https://developers.cloudflare.com/workers/databases/third-party-integrations/neon/); Hyperdrive can be evaluated later, it is not configured here. No database connection is made from React. The project owner's Neon database has **not been connected or tested**; a separate disposable Neon test is described below.
 
 `GET /api/health/db` requires `Authorization: Bearer <operator-token>` with `DB_HEALTH_TOKEN` configured and at least 32 characters. On success returns only `{"status":"ok"}`; missing/invalid authorization -> 401; connection errors -> 503 with generic response. No DB query happens before authorization. The token is not a user session; keep it out of browsers, add rate-limiting/network controls, and do not put it in shell history.
+
+## Phase 2B disposable Neon proof
+
+A separate disposable Neon database was used to test the existing migration runner twice with a direct URL and to test Worker Neon HTTP and WebSocket Pool with the same URL. The owner's database has not been connected. An unresolved Worker pool lifecycle error and legacy-identity reconciliation concern prevent treating the exploratory auth mapping as production-ready. See [Phase 2B changelog](PHASE_2B_CHANGELOG.md). No new application migration was created.
 
 ## Schema (initial, provisional)
 
@@ -29,4 +33,4 @@ npm run db:migrate
 
 The Node `pg` client obtains a session advisory lock on one connection, makes a `schema_migrations` ledger, hashes each ordered file, and runs each unapplied migration plus ledger insert inside one transaction. A second run skips already applied versions; missing/changed history or out-of-order files fail rather than silently reapply. Applied SQL files must never be edited; add a new version. Runner emits generic failures to avoid leaking credentials or data. Do not run against transaction-pooling endpoints; Neon `-pooler` URLs are rejected. Backup and manual review remain necessary, especially for destructive changes. Restrict DB account privileges and concurrency.
 
-The initial SQL, repeated run, checksum mismatch and key constraints were tested against a disposable local PostgreSQL 17 database, **not Neon**. Optional `npm run test:db --workspace @hasan/api` requires `TEST_DATABASE_URL` pointing to a disposable already-migrated database; test data is rolled back. It must never target production.
+The initial SQL and repeated run were also tested against a disposable Neon database as described above. Checksum mismatch and key constraints were tested against disposable local PostgreSQL 17; they have not been retested on Neon. Optional `npm run test:db --workspace @hasan/api` requires `TEST_DATABASE_URL` pointing to a disposable already-migrated database; test data is rolled back. It must never target production.

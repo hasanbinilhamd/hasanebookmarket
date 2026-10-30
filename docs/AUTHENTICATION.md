@@ -2,6 +2,10 @@
 
 **Status:** no login/register, auth package, session validation, OAuth callback, email sender, or provider-specific schema is implemented. `apps/api/src/auth.js` fails closed. `/login` is a nonfunctional placeholder. Owner approval, domain, database, email delivery and credentials are needed before integration.
 
+## Phase 2B compatibility investigation (incomplete)
+
+A local Wrangler proof connected Better Auth 1.7.14 to a disposable real Neon database and exercised the core email/session flows. A repeatable idle WebSocket pool error remains unresolved, and a pre-existing unverified legacy identity retained its independent bridge row when a magic link verified that email. These results do **not** prove a production-safe adapter or identity migration. Authentication remains fail-closed in the application. See [Phase 2B changelog](PHASE_2B_CHANGELOG.md) for exact scope, limitations and next steps. No production Cloudflare deployment, sender or domain has been validated.
+
 ## Comparison (official documentation checked 2026-10-30)
 
 | Topic | Better Auth (self-hosted library) | Clerk (managed) |
@@ -14,7 +18,7 @@
 
 **Recommendation:** Better Auth, conditional on a successful Worker/Neon proof, because it can meet the HttpOnly requirement and keeps identity storage under project control. This is not a production-ready implementation or a guarantee that its default schema matches ours. Clerk is easier to operate but its documented app session cookie conflicts with the strict HttpOnly requirement as normally deployed. Recheck pricing/plan limits before purchase.
 
-## Before implementation
+## Phase 2 checklist (historical; Phase 2B choices above supersede provider and method decisions)
 
 1. Owner approves provider, login method (password or passwordless email), production web/API domains, email provider and operational budget. Prefer same-site `web` and `api` subdomains or a same-origin proxy; do not rely on third-party cross-site cookies. Confirm domain and callback URLs first.
 2. Create separate dev/prod Neon databases, Google OAuth apps with exact callback URLs, and verified sender/domain at chosen email provider. Store secrets only as Worker secrets; **do not paste them into chat**.
