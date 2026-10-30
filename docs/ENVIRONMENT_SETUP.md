@@ -1,6 +1,6 @@
 # Environment setup and secrets
 
-Node 22+ and npm are required. Run `npm ci` at repository root. Root `.env.example` documents names but is **not automatically loaded**. Never paste credentials into chat, commits, screenshots or logs. Use separate development and production accounts/resources, least-privilege database roles and rotated secrets.
+Node 22.x and npm are required for the pinned repository build. Run `npm ci` at repository root. Root `.env.example` documents names but is **not automatically loaded**. Never paste credentials into chat, commits, screenshots or logs. Use separate development and production accounts/resources, least-privilege database roles and rotated secrets.
 
 | Name | Where | State / meaning |
 | --- | --- | --- |

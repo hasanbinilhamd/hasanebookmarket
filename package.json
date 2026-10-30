@@ -15,6 +15,6 @@
     "db:migrate": "npm run migrate --workspace @hasan/api"
   },
   "engines": {
-    "node": ">=22"
+    "node": "22.x"
   }
 }

@@ -4,7 +4,7 @@ A single repository with independent React/Vite 3D web and Cloudflare Workers AP
 
 ## Prerequisites and commands
 
-Node.js **22+** and npm are required (current Wrangler requires Node 22). From repository root:
+Node.js **22.x** and npm are recommended and pinned for the repository/Vercel build (current Wrangler requires Node 22 or newer). From repository root:
 
 ```sh
 npm ci
@@ -29,7 +29,7 @@ docs/                         audit, roadmap, architecture and Phase 2 setup
 scripts/                      optional browser smoke test
 ```
 
-The npm workspace patterns also reserve `packages/*`, but no shared package is created: no meaningful contract is currently consumed by both applications. The rendering worker is a future independent application. There is one root lockfile. `apps/web/vercel.json` contains the SPA rewrite; set Vercel Root Directory to `apps/web` as described in [deployment](docs/DEPLOYMENT.md).
+The npm workspace patterns also reserve `packages/*`, but no shared package is created: no meaningful contract is currently consumed by both applications. The rendering worker is a future independent application. There is one root lockfile. Root `vercel.json` builds only the web workspace and publishes `apps/web/dist` when the Vercel project uses the repository root. Alternatively, `apps/web/vercel.json` works with Root Directory `apps/web`. See [deployment](docs/DEPLOYMENT.md); do not mix the two configurations.
 
 Read [architecture](docs/ARCHITECTURE.md), [environment setup](docs/ENVIRONMENT_SETUP.md), [database](docs/DATABASE.md), [storage](docs/STORAGE.md), [authentication](docs/AUTHENTICATION.md), [baseline](docs/PHASE_2_BASELINE.md) and [change log](docs/PHASE_2_CHANGELOG.md) before deploying. The migration has been checked on a disposable local PostgreSQL database, not Neon. Actual Neon, private R2 resources, domains and authentication are still pending owner setup and verification.
 
